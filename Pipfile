@@ -7,7 +7,7 @@ name = "pypi"
 requests = "*"
 pyyaml = "*"
 marshmallow = "*"
-marshmallow-dataclass = "*"
+marshmallow-dataclass = {extras = ["union"], version = "*"}
 
 [dev-packages]
 

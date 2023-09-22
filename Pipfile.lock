@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "699ee725e96d7a2b4c2387a78c202df770fa7c2706d22e2ff382199d7d5f1d17"
+            "sha256": "ac013ccec3ffe0843ce93ead596f795e1445e4c112f4575d43313948e6c0bbbe"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -124,11 +124,13 @@
             "version": "==3.20.1"
         },
         "marshmallow-dataclass": {
+            "extras": [
+                "union"
+            ],
             "hashes": [
                 "sha256:7885e9b5f5287b64573b174d69334fd20de1628001a4fa2adc8e75be5196755e",
                 "sha256:a21f4d050a1d24249fd43aa56c7e4aea4b6454e049dc2c5f1496f479e30bf5d7"
             ],
-            "index": "pypi",
             "markers": "python_version >= '3.6'",
             "version": "==8.6.0"
         },
@@ -213,6 +215,13 @@
             "index": "pypi",
             "markers": "python_version >= '3.7'",
             "version": "==2.31.0"
+        },
+        "typeguard": {
+            "hashes": [
+                "sha256:bbe993854385284ab42fd5bd3bee6f6556577ce8b50696d6cb956d704f286c8e",
+                "sha256:fee5297fdb28f8e9efcb8142b5ee219e02375509cd77ea9d270b5af826358d5a"
+            ],
+            "version": "==3.0.2"
         },
         "typing-extensions": {
             "hashes": [
