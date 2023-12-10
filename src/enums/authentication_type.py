@@ -1,7 +1,7 @@
 from .__base_enum import BaseEnum
 
 
-class Auth(BaseEnum):
+class AuthenticationType(BaseEnum):
     NONE = "none"
     API_KEY = "api_key"
     BEARER = "bearer"
