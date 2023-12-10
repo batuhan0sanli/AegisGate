@@ -1,7 +1,7 @@
 from .__base_enum import BaseEnum
 
 
-class Method(BaseEnum):
+class HttpMethod(BaseEnum):
     GET = "GET"
     POST = "POST"
     PUT = "PUT"
