@@ -1,0 +1,10 @@
+Service1RouteName:
+  description: Route description
+  path: /
+  allow_methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+  target: http://localhost:8080
+  plugins:

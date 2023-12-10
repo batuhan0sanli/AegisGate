@@ -1,0 +1,4 @@
+authentications: !include authentications.yaml
+routes: !include routes.yaml
+shortcuts: !include shortcuts.yaml
+services: !include services.yaml

@@ -1,0 +1,7 @@
+Service1ShortcutName:
+  description: Shortcut description
+  path: /
+  method: GET
+  target_path: http://localhost:8080
+  target_method: GET
+  plugins:

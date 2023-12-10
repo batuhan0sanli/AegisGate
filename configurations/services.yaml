@@ -1,0 +1,15 @@
+ServiceName:
+  description: service_description
+  mode: proxy
+  path: /
+  security: Service1Auth
+  urls:
+    - Service1RouteName
+
+ServiceName2:
+  description: service_description
+  mode: shortcut
+  path: /
+  security: Service1Auth
+  urls:
+    - Service1ShortcutName
