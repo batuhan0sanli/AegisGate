@@ -2,11 +2,10 @@ package types
 
 // ServiceConfig holds configuration for a single service
 type ServiceConfig struct {
-	Name         string  `yaml:"name"`
-	BasePath     string  `yaml:"base_path"`
-	TargetURL    string  `yaml:"target_url"`
-	LoadBalancer string  `yaml:"load_balancer"`
-	Routes       []Route `yaml:"routes"`
+	Name      string  `yaml:"name"`
+	BasePath  string  `yaml:"base_path"`
+	TargetURL string  `yaml:"target_url"`
+	Routes    []Route `yaml:"routes"`
 }
 
 // Route represents a single route configuration
