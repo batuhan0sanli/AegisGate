@@ -10,8 +10,8 @@ type ServiceConfig struct {
 
 // Route represents a single route configuration
 type Route struct {
-	Path      string   `yaml:"path"`
-	Methods   []string `yaml:"methods"`
-	StripPath bool     `yaml:"strip_path"`
-	Timeout   string   `yaml:"timeout,omitempty"`
+	Path      string       `yaml:"path"`
+	Methods   []HTTPMethod `yaml:"methods"`
+	StripPath bool         `yaml:"strip_path"`
+	Timeout   uint         `yaml:"timeout,omitempty"`
 }
