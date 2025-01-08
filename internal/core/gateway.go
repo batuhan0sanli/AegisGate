@@ -1,6 +1,7 @@
 package core
 
 import (
+	"AegisGate/internal/logger"
 	"AegisGate/pkg/types"
 	"context"
 	"fmt"
@@ -14,18 +15,29 @@ import (
 
 // Gateway represents the API gateway
 type Gateway struct {
-	config  *types.Config
-	router  *httprouter.Router
-	proxies *ProxyManager
+	config    *types.Config
+	router    *httprouter.Router
+	proxies   *ProxyManager
+	logger    *logger.Logger
+	reqLogger *logger.RequestLogger
 }
 
 // New creates a new Gateway instance
 func New(config *types.Config) *Gateway {
+	l := logger.New(config.Server.Debug)
+
 	g := &Gateway{
-		config:  config,
-		router:  httprouter.New(),
-		proxies: NewProxyManager(),
+		config:    config,
+		router:    httprouter.New(),
+		proxies:   NewProxyManager(config.Server.Debug),
+		logger:    l,
+		reqLogger: logger.NewRequestLogger(l, "AegisGate"),
 	}
+
+	g.logger.Debug("Debug mode enabled")
+
+	// Set up 404 handler
+	g.router.NotFound = g.handleNotFound()
 
 	// Initialize routes
 	if err := g.initializeRoutes(); err != nil {
@@ -51,7 +63,7 @@ func (g *Gateway) initializeRoutes() error {
 			for _, method := range route.Methods {
 				handler := g.createHandler(service, route)
 				g.router.Handle(method.String(), routerPath, handler)
-				log.Printf("Registered route: %s %s -> %s", method, routerPath, service.TargetURL)
+				g.logger.Debug("Registered route: %s %s -> %s", method, routerPath, service.TargetURL)
 			}
 		}
 	}
@@ -110,6 +122,14 @@ func (g *Gateway) createHandler(service types.ServiceConfig, route types.Route) 
 // Start starts the gateway server
 func (g *Gateway) Start() error {
 	addr := fmt.Sprintf("%s:%d", g.config.Server.Host, g.config.Server.Port)
-	log.Printf("Starting gateway server on %s", addr)
+	g.logger.Info("Starting gateway server on %s", addr)
 	return http.ListenAndServe(addr, g.router)
+}
+
+// handleNotFound returns a handler for 404 responses
+func (g *Gateway) handleNotFound() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		g.reqLogger.LogRequest(r)
+		http.Error(w, "Not Found", http.StatusNotFound)
+	})
 }
