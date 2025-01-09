@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
@@ -17,12 +18,14 @@ type Gateway struct {
 	config    *types.Config
 	router    *httprouter.Router
 	proxies   *ProxyManager
+	server    *http.Server
 	logger    *logger.Logger
 	reqLogger *logger.RequestLogger
+	mu        sync.RWMutex
 }
 
 // New creates a new Gateway instance
-func New(config *types.Config, configPath string) (*Gateway, error) {
+func New(config *types.Config) (*Gateway, error) {
 	l := logger.New(config.Server.Debug)
 
 	g := &Gateway{
@@ -122,7 +125,11 @@ func (g *Gateway) createHandler(service types.ServiceConfig, route types.Route) 
 func (g *Gateway) Start() error {
 	addr := fmt.Sprintf("%s:%d", g.config.Server.Host, g.config.Server.Port)
 	g.logger.Info("Starting gateway server on %s", addr)
-	return http.ListenAndServe(addr, g.router)
+	g.server = &http.Server{
+		Addr:    addr,
+		Handler: g.router,
+	}
+	return g.server.ListenAndServe()
 }
 
 // handleNotFound returns a handler for 404 responses
@@ -133,10 +140,29 @@ func (g *Gateway) handleNotFound() http.Handler {
 	})
 }
 
-// Add Close method
-func (g *Gateway) Close() error {
-	if g.watcher != nil {
-		return g.watcher.Close()
+// OnConfigChange updates the gateway configuration
+func (g *Gateway) OnConfigChange(newConfig *types.Config) error {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	// Create new router and proxy manager
+	newRouter := httprouter.New()
+	newProxies := NewProxyManager(newConfig.Server.Debug)
+
+	// Initialize new routes with new configuration
+	g.config = newConfig
+	g.router = newRouter
+	g.proxies = newProxies
+	g.router.NotFound = g.handleNotFound()
+
+	if err := g.initializeRoutes(); err != nil {
+		return fmt.Errorf("failed to initialize routes: %w", err)
 	}
+
 	return nil
+}
+
+// Close shuts down the gateway
+func (g *Gateway) Close() error {
+	return g.server.Shutdown(context.Background())
 }
