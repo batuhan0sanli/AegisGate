@@ -5,7 +5,6 @@ import (
 	"AegisGate/pkg/types"
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -23,7 +22,7 @@ type Gateway struct {
 }
 
 // New creates a new Gateway instance
-func New(config *types.Config) *Gateway {
+func New(config *types.Config, configPath string) (*Gateway, error) {
 	l := logger.New(config.Server.Debug)
 
 	g := &Gateway{
@@ -41,10 +40,10 @@ func New(config *types.Config) *Gateway {
 
 	// Initialize routes
 	if err := g.initializeRoutes(); err != nil {
-		log.Fatalf("Failed to initialize routes: %v", err)
+		return nil, fmt.Errorf("failed to initialize routes: %w", err)
 	}
 
-	return g
+	return g, nil
 }
 
 // initializeRoutes sets up all the routes from the configuration
@@ -132,4 +131,12 @@ func (g *Gateway) handleNotFound() http.Handler {
 		g.reqLogger.LogRequest(r)
 		http.Error(w, "Not Found", http.StatusNotFound)
 	})
+}
+
+// Add Close method
+func (g *Gateway) Close() error {
+	if g.watcher != nil {
+		return g.watcher.Close()
+	}
+	return nil
 }
