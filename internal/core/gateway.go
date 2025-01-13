@@ -156,5 +156,6 @@ func (g *Gateway) OnConfigChange(newConfig *types.Config) error {
 
 // Close shuts down the gateway
 func (g *Gateway) Close() error {
+	g.logger.Debug("Shutting down gateway server")
 	return g.server.Shutdown(context.Background())
 }

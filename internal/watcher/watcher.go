@@ -108,5 +108,6 @@ func (cw *ConfigWatcher) handleConfigChange() {
 
 // Close stops watching and cleans up resources
 func (cw *ConfigWatcher) Close() error {
+	cw.logger.Debug("Closing config watcher")
 	return cw.watcher.Close()
 }

@@ -15,22 +15,25 @@ import (
 )
 
 // handleShutdown sets up signal handling and graceful shutdown
-func handleShutdown(g *core.Gateway, w *watcher.ConfigWatcher) {
+func handleShutdown(g *core.Gateway, w *watcher.ConfigWatcher, l *logger.Logger) {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
 		sig := <-sigChan
-		log.Printf("Received signal %v, shutting down gateway...", sig)
+		l.Info("Received signal %v, shutting down gateway...", sig)
 
 		// Close the config watcher
 		if err := w.Close(); err != nil {
-			log.Printf("Error closing config watcher: %v", err)
+			l.Error("Error closing config watcher: %v", err)
 		}
+		l.Debug("Config watcher closed")
 
 		if err := g.Close(); err != nil {
-			log.Printf("Error during shutdown: %v", err)
+			l.Error("Error during shutdown: %v", err)
 		}
+		l.Debug("Gateway closed")
+		l.Debug("Exiting...")
 		os.Exit(0)
 	}()
 }
@@ -57,7 +60,6 @@ func main() {
 		log.Panicf("Failed to create gateway: %v", err)
 	}
 	defer func(gateway *core.Gateway) {
-		log.Printf("Shutting down gateway...")
 		err := gateway.Close()
 		if err != nil {
 			log.Printf("Error during shutdown: %v", err)
@@ -67,7 +69,7 @@ func main() {
 	// Initialize config watcher
 	configWatcher, err := watcher.New(configPath, l)
 	if err != nil {
-		log.Fatalf("failed to create config watcher: %v", err)
+		log.Fatalf("Failed to create config watcher: %v", err)
 	}
 	defer func(configWatcher *watcher.ConfigWatcher) {
 		err := configWatcher.Close()
@@ -78,7 +80,7 @@ func main() {
 	configWatcher.RegisterHandler(gateway)
 
 	// Set up shutdown handling
-	handleShutdown(gateway, configWatcher)
+	handleShutdown(gateway, configWatcher, l)
 
 	// Start the gateway
 	err = gateway.Start()
