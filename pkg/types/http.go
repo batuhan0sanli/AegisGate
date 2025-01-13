@@ -22,10 +22,35 @@ const (
 	CONNECT HTTPMethod = "CONNECT"
 )
 
+// Abbreviated HTTP methods
+const (
+	CRUD HTTPMethod = "CRUD" // Create, Read, Update, Delete
+	RO   HTTPMethod = "RO"   // Read-Only (GET, HEAD)
+	RW   HTTPMethod = "RW"   // Read-Write (GET, POST, PUT, PATCH)
+	FULL HTTPMethod = "FULL" // All common methods including OPTIONS, TRACE and CONNECT
+)
+
+// expandAbbreviation converts method abbreviations to their corresponding HTTP methods
+func expandAbbreviation(method HTTPMethod) []HTTPMethod {
+	switch method {
+	case CRUD:
+		return []HTTPMethod{GET, POST, PUT, DELETE}
+	case RO:
+		return []HTTPMethod{GET, HEAD}
+	case RW:
+		return []HTTPMethod{GET, POST, PUT, PATCH}
+	case FULL:
+		return []HTTPMethod{GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, TRACE, CONNECT}
+	default:
+		return []HTTPMethod{method}
+	}
+}
+
 // IsValid checks if the HTTP method is valid
 func (m *HTTPMethod) IsValid() bool {
 	switch *m {
-	case GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, TRACE, CONNECT:
+	case GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, TRACE, CONNECT,
+		CRUD, RO, RW, FULL:
 		return true
 	default:
 		return false
@@ -48,10 +73,10 @@ func ParseHTTPMethod(s string) (*HTTPMethod, error) {
 
 // UnmarshalYAML implements the yaml.Unmarshaler interface
 func (m *HTTPMethod) UnmarshalYAML(value *yaml.Node) error {
-	method := HTTPMethod(strings.ToUpper(value.Value))
-	if !method.IsValid() {
-		return fmt.Errorf("invalid HTTP method: %s", value.Value)
+	method, err := ParseHTTPMethod(value.Value)
+	if err != nil {
+		return err
 	}
-	*m = method
+	*m = *method
 	return nil
 }

@@ -61,8 +61,8 @@ func (g *Gateway) initializeRoutes() error {
 		for _, route := range service.Routes {
 			routerPath := g.convertPath(service.BasePath, route.Path)
 
-			// Register handlers for each HTTP method
-			for _, method := range route.Methods {
+			// Use GetMethods() to get the expanded list of methods
+			for _, method := range route.GetMethods() {
 				handler := g.createHandler(service, route)
 				g.router.Handle(method.String(), routerPath, handler)
 				g.logger.Debug("Registered route: %s %s -> %s", method, routerPath, service.TargetURL)
