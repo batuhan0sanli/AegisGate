@@ -38,9 +38,6 @@ func New(config *types.Config) (*Gateway, error) {
 
 	g.logger.Debug("Debug mode enabled")
 
-	// Set up 404 handler
-	g.router.NotFound = g.handleNotFound()
-
 	// Initialize routes
 	if err := g.initializeRoutes(); err != nil {
 		return nil, fmt.Errorf("failed to initialize routes: %w", err)
@@ -51,6 +48,10 @@ func New(config *types.Config) (*Gateway, error) {
 
 // initializeRoutes sets up all the routes from the configuration
 func (g *Gateway) initializeRoutes() error {
+	// Set up default routes
+	g.router.NotFound = g.handleNotFound()
+	g.router.GET("/health", g.handleHealthCheck)
+
 	for _, service := range g.config.Services {
 		// Add service to proxy manager
 		if err := g.proxies.AddService(service); err != nil {
@@ -132,14 +133,6 @@ func (g *Gateway) Start() error {
 	return g.server.ListenAndServe()
 }
 
-// handleNotFound returns a handler for 404 responses
-func (g *Gateway) handleNotFound() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		g.reqLogger.LogRequest(r)
-		http.Error(w, "Not Found", http.StatusNotFound)
-	})
-}
-
 // OnConfigChange updates the gateway configuration
 func (g *Gateway) OnConfigChange(newConfig *types.Config) error {
 	g.mu.Lock()
@@ -153,7 +146,6 @@ func (g *Gateway) OnConfigChange(newConfig *types.Config) error {
 	g.config = newConfig
 	g.router = newRouter
 	g.proxies = newProxies
-	g.router.NotFound = g.handleNotFound()
 
 	if err := g.initializeRoutes(); err != nil {
 		return fmt.Errorf("failed to initialize routes: %w", err)

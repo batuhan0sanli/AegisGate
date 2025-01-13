@@ -63,12 +63,20 @@ func validateServices(services []types.ServiceConfig) error {
 
 // validateService validates a single service configuration
 func validateService(service types.ServiceConfig, index int) error {
+	reservedPaths := map[string]bool{
+		"/health": true,
+	}
+
 	if service.Name == "" {
 		return fmt.Errorf("service[%d]: name cannot be empty", index)
 	}
 
 	if service.BasePath == "" {
 		return fmt.Errorf("service[%d]: base path cannot be empty", index)
+	}
+
+	if reservedPaths[service.BasePath] {
+		return fmt.Errorf("service[%s]: path '%s' is reserved for internal use", service.Name, service.BasePath)
 	}
 
 	if !strings.HasPrefix(service.BasePath, "/") {
