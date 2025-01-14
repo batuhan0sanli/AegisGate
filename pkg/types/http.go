@@ -34,7 +34,7 @@ const (
 func expandAbbreviation(method HTTPMethod) []HTTPMethod {
 	switch method {
 	case CRUD:
-		return []HTTPMethod{GET, POST, PUT, DELETE}
+		return []HTTPMethod{GET, POST, PUT, PATCH, DELETE}
 	case RO:
 		return []HTTPMethod{GET, HEAD}
 	case RW:
