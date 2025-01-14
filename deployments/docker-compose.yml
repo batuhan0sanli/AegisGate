@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  aegisgate:
+    build:
+      context: ..
+      dockerfile: build/Docker/Dockerfile
+    container_name: aegisgate
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./example-config.yml:/app/config.yaml:ro
+    environment:
+      - CONFIG_PATH=/app/config.yaml
+      - TZ=UTC
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - aegisgate-network
+
+networks:
+  aegisgate-network:
+    driver: bridge 

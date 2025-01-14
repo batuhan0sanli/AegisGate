@@ -1,0 +1,32 @@
+server:
+  host: "0.0.0.0"
+  port: 8080
+  debug: false
+
+services:
+  - name: "example-api"
+    base_path: "/api"
+    target_url: "https://api.example.com"
+    routes:
+      - path: "/*"
+        methods: ["FULL"]
+        strip_path: true
+        timeout: 30
+
+  - name: "httpbin"
+    base_path: "/httpbin"
+    target_url: "https://httpbin.org"
+    routes:
+      - path: "/*"
+        methods: ["CRUD"]
+        strip_path: true
+        timeout: 10
+
+  - name: "jsonplaceholder"
+    base_path: "/todos"
+    target_url: "https://jsonplaceholder.typicode.com"
+    routes:
+      - path: "/*"
+        methods: ["GET", "POST"]
+        strip_path: true
+        timeout: 5 
