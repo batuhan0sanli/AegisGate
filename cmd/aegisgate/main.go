@@ -39,10 +39,10 @@ func handleShutdown(g *core.Gateway, w *watcher.ConfigWatcher, l *logger.Logger)
 }
 
 func main() {
-	// Get config file path from command line argument or use default
-	configPath := "config.yaml"
-	if len(os.Args) > 1 {
-		configPath = os.Args[1]
+	// Get config file path from environment or use default value
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		configPath = "config.yaml"
 	}
 
 	// Load the configuration
